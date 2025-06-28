@@ -48,6 +48,7 @@ jobs:
     runs-on: ['self-hosted', 'linux', 'x64', '4xlarge']
     name: Test with CPU
     strategy:
+      fail-fast: false
       matrix:
         cargo-args: ['--workspace', '--workspace --no-default-features', '--release -- --ignored']
     steps:
@@ -79,6 +80,7 @@ jobs:
       CXX: g++-12
       NVCC_PREPEND_FLAGS: "-ccbin /usr/bin/g++-12"
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: "Test OpenCL only"
@@ -114,7 +116,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes libhwloc-dev nvidia-cuda-toolkit ocl-icd-opencl-dev
       - name: Download the proof params
-        uses: filecoin-project/rust-fil-proofs/.github/actions/proof-params-download@main
+        uses: filecoin-project/rust-fil-proofs/.github/actions/proof-params-download@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: dtolnay/rust-toolchain@21dc36fb71dd22e3317045c0c31a3f4249868b17
