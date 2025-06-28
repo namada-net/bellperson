@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes libhwloc-dev ocl-icd-opencl-dev
-      # TODO: Remove this and other rust installation directives from jobs running Add commentMore actions
+      # TODO: Remove this and other rust installation directives from jobs running
       # on self-hosted runners once rust is available on these machines by default
       - uses: dtolnay/rust-toolchain@21dc36fb71dd22e3317045c0c31a3f4249868b17
         with:
@@ -68,7 +68,7 @@ jobs:
         run: test -f aggregation.csv && cat aggregation.csv || true
 
   test_gpu:
-    runs-on: ['self-hosted', 'linux', 'x64', 'xlarge+gpu']
+    runs-on: ['self-hosted', 'linux', 'x64', '2xlarge+gpu']
     name: Test
     env:
       # Build the kernel only for the single architecture that is used on CI.
@@ -100,9 +100,9 @@ jobs:
             framework: ""
     steps:
       - uses: actions/checkout@v4
-      # TODO: Move the driver installation to the AMI.Add commentMore actions
+      # TODO: Move the driver installation to the AMI.
       # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html
-      # https://www.nvidia.com/en-us/drivers/Add commentMore actions
+      # https://www.nvidia.com/en-us/drivers/
       - name: Install CUDA drivers
         run: |
           curl -L -o nvidia-driver-local-repo-ubuntu2404-570.148.08_1.0-1_amd64.deb https://us.download.nvidia.com/tesla/570.148.08/nvidia-driver-local-repo-ubuntu2404-570.148.08_1.0-1_amd64.deb
