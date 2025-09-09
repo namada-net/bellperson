@@ -257,7 +257,7 @@ where
             let subset = precomp_table.at_point(start_idx);
             let scalars = match points {
                 ScalarList::Slice(s) => &s[start_idx..end_idx],
-                ScalarList::Getter(ref getter, _) => {
+                ScalarList::Getter(getter, _) => {
                     for i in start_idx..end_idx {
                         scalar_storage[i - start_idx] = getter(i);
                     }

@@ -140,7 +140,7 @@ where
     for _ in 0..proof_num {
         use rand::Rng;
 
-        let t: u128 = rng.gen();
+        let t: u128 = rng.r#gen();
 
         let mut repr = E::Fr::ZERO.to_repr();
         let mut repr_u64s = le_bytes_to_u64s(repr.as_ref());
