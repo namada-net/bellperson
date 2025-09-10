@@ -182,13 +182,13 @@ where
 
     let mut poly_f: Vec<Vec<E::Fr>> = Vec::new();
 
-    for j in 0..n / 2 {
+    for item in statements.iter().take(n / 2) {
         let mut poly_f_j: Vec<E::Fr> = Vec::new();
         let mut poly_w0: Vec<E::Fr> = Vec::new();
         for i in 0..proofs.len() {
-            poly_f_j.push(statements[i][j]);
+            poly_f_j.push(item[i]);
             if i < (proofs.len() - 1) {
-                poly_w0.push(statements[i + 1][j]);
+                poly_w0.push(item[i + 1]);
             }
         }
 

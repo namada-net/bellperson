@@ -138,7 +138,10 @@
 //! using the [`ff`] and [`group`] crates, while specific proving systems will
 //! be separate crates that pull in the dependencies they require.
 
-#![cfg_attr(all(target_arch = "aarch64", nightly), feature(stdsimd))]
+#![cfg_attr(
+    all(target_arch = "aarch64", nightly),
+    feature(stdarch_aarch64_prefetch)
+)]
 
 #[cfg(test)]
 #[macro_use]
