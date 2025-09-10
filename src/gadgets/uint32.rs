@@ -410,10 +410,10 @@ impl UInt32 {
 #[cfg(test)]
 mod test {
     use super::UInt32;
+    use crate::ConstraintSystem;
     use crate::gadgets::boolean::Boolean;
     use crate::gadgets::multieq::MultiEq;
     use crate::gadgets::test::*;
-    use crate::ConstraintSystem;
     use blstrs::Scalar as Fr;
     use ff::Field;
     use rand_core::{RngCore, SeedableRng};

@@ -13,10 +13,10 @@ use self::dummy_engine::*;
 use std::marker::PhantomData;
 use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 
-use bellperson::groth16::{
+use nam_bellperson::groth16::{
     create_proof, create_proof_batch, generate_parameters, prepare_verifying_key, verify_proof,
 };
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
+use nam_bellperson::{Circuit, ConstraintSystem, SynthesisError};
 
 #[derive(Clone)]
 struct XorDemo<Scalar: PrimeField> {
@@ -306,7 +306,7 @@ fn test_xordemo() {
         expected_a.add_assign(&u_i[0]); // a_0 = 1
         expected_a.add_assign(&u_i[1]); // a_1 = 1
         expected_a.add_assign(&u_i[2]); // a_2 = 1
-                                        // a_3 = 0
+        // a_3 = 0
         assert_eq!(proof.a, expected_a);
     }
 
@@ -323,7 +323,7 @@ fn test_xordemo() {
         expected_b.add_assign(&v_i[0]); // a_0 = 1
         expected_b.add_assign(&v_i[1]); // a_1 = 1
         expected_b.add_assign(&v_i[2]); // a_2 = 1
-                                        // a_3 = 0
+        // a_3 = 0
         assert_eq!(proof.b, expected_b);
     }
 
@@ -434,8 +434,8 @@ fn test_create_batch_single() {
 #[test]
 #[allow(clippy::manual_swap)]
 fn test_verify_random_single() {
-    use bellperson::groth16::{create_random_proof, generate_random_parameters, Proof};
     use blstrs::{Bls12, G1Projective, G2Projective, Scalar as Fr};
+    use nam_bellperson::groth16::{Proof, create_random_proof, generate_random_parameters};
 
     let mut rng = XorShiftRng::from_seed([
         0x59, 0x62, 0xbe, 0x5d, 0x76, 0x3d, 0x31, 0x8d, 0x17, 0xdb, 0x37, 0x32, 0x54, 0x06, 0xbc,
@@ -511,10 +511,10 @@ fn test_verify_random_single() {
 #[test]
 #[allow(clippy::manual_swap)]
 fn test_verify_random_batch() {
-    use bellperson::groth16::{
-        create_random_proof_batch, generate_random_parameters, verify_proofs_batch, Proof,
-    };
     use blstrs::{Bls12, G1Projective, G2Projective, Scalar as Fr};
+    use nam_bellperson::groth16::{
+        Proof, create_random_proof_batch, generate_random_parameters, verify_proofs_batch,
+    };
 
     let mut rng = XorShiftRng::from_seed([
         0x59, 0x62, 0xbe, 0x5d, 0x76, 0x3d, 0x31, 0x8d, 0x17, 0xdb, 0x37, 0x32, 0x54, 0x06, 0xbc,
@@ -554,63 +554,73 @@ fn test_verify_random_batch() {
         // mess up the inputs
         {
             let r = Fr::random(&mut rng);
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&proof[0], &proof[1], &proof[2]],
-                &[vec![r], vec![Fr::ONE], vec![Fr::ONE]],
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&proof[0], &proof[1], &proof[2]],
+                    &[vec![r], vec![Fr::ONE], vec![Fr::ONE]],
+                )
+                .unwrap()
+            );
         }
 
         // mess up the proof a little bit
         {
             let mut fake_proof = proof.clone();
             fake_proof[0].a = fake_proof[0].a.mul(Fr::random(&mut rng)).to_affine();
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
-                &inputs
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
+                    &inputs
+                )
+                .unwrap()
+            );
         }
 
         {
             let mut fake_proof = proof.clone();
             fake_proof[1].b = fake_proof[1].b.mul(Fr::random(&mut rng)).to_affine();
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
-                &inputs
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
+                    &inputs
+                )
+                .unwrap()
+            );
         }
 
         {
             let mut fake_proof = proof.clone();
             fake_proof[2].c = fake_proof[2].c.mul(Fr::random(&mut rng)).to_affine();
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
-                &inputs
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
+                    &inputs
+                )
+                .unwrap()
+            );
         }
 
         {
             let mut fake_proof = proof.clone();
             let fp0 = &mut fake_proof[0];
             std::mem::swap(&mut fp0.c, &mut fp0.a);
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
-                &inputs
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&fake_proof[0], &fake_proof[1], &fake_proof[2]],
+                    &inputs
+                )
+                .unwrap()
+            );
         }
 
         // entirely random proofs
@@ -632,13 +642,15 @@ fn test_verify_random_batch() {
                     c: G1Projective::random(&mut rng).to_affine(),
                 },
             ];
-            assert!(!verify_proofs_batch(
-                &pvk,
-                &mut rng,
-                &[&random_proof[0], &random_proof[1], &random_proof[2],],
-                &inputs
-            )
-            .unwrap());
+            assert!(
+                !verify_proofs_batch(
+                    &pvk,
+                    &mut rng,
+                    &[&random_proof[0], &random_proof[1], &random_proof[2],],
+                    &inputs
+                )
+                .unwrap()
+            );
         }
     }
 }

@@ -17,7 +17,7 @@
 //! ```no_run
 //! # #[cfg(not(feature = "cuda-supraseal"))]
 //! # {
-//! use bellperson::{
+//! use nam_bellperson::{
 //!     gadgets::{
 //!         boolean::{AllocatedBit, Boolean},
 //!         multipack,

@@ -2,9 +2,9 @@
 
 use ff::PrimeField;
 
+use super::Assignment;
 use super::boolean::Boolean;
 use super::num::{AllocatedNum, Num};
-use super::Assignment;
 use bellpepper_core::{ConstraintSystem, SynthesisError};
 
 /// Takes a sequence of booleans and exposes them as compact

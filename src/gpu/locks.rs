@@ -1,9 +1,9 @@
 use std::fs::File;
 use std::path::PathBuf;
 
+use ec_gpu_gen::EcError;
 use ec_gpu_gen::fft::FftKernel;
 use ec_gpu_gen::rust_gpu_tools::{Device, UniqueId};
-use ec_gpu_gen::EcError;
 use ff::Field;
 use fs2::FileExt;
 use group::prime::PrimeCurveAffine;

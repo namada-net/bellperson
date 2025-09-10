@@ -17,7 +17,7 @@ use ff::{Field, PrimeField};
 
 use super::SynthesisError;
 use crate::gpu;
-use ec_gpu_gen::fft_cpu;
+
 use ec_gpu_gen::threadpool::Worker;
 
 pub struct EvaluationDomain<F: PrimeField + gpu::GpuName> {
@@ -279,11 +279,93 @@ fn best_fft<F: PrimeField + gpu::GpuName>(
 
     let log_cpus = worker.log_num_threads();
     for ((a, omega), log_n) in coeffs.iter_mut().zip(omegas.iter()).zip(log_ns.iter()) {
-        if *log_n <= log_cpus {
-            fft_cpu::serial_fft::<F>(a, omega, *log_n);
-        } else {
-            fft_cpu::parallel_fft::<F>(a, worker, omega, *log_n, log_cpus);
+        let n = a.len();
+        debug_assert_eq!(n, 1 << log_n);
+        if *log_n == 0 {
+            return;
         }
+        let offset = 64 - log_n;
+        for i in 0..n as u64 {
+            let ri = i.reverse_bits() >> offset;
+            if i < ri {
+                a.swap(ri as usize, i as usize);
+            }
+        }
+
+        let twiddles: Vec<_> = (0..(n / 2))
+            .scan(F::ONE, |w, _| {
+                let tw = *w;
+                *w *= omega;
+                Some(tw)
+            })
+            .collect();
+        if *log_n <= log_cpus {
+            serial_fft::<F>(a, n, *log_n, &twiddles);
+        } else {
+            parallel_fft::<F>(a, n, 1, &twiddles);
+        }
+    }
+}
+
+fn serial_fft<S: PrimeField>(a: &mut [S], n: usize, log_n: u32, twiddles: &[S]) {
+    let mut chunk = 2_usize;
+    let mut twiddle_chunk = n / 2;
+    for _ in 0..log_n {
+        a.chunks_mut(chunk).for_each(|coeffs| {
+            let (left, right) = coeffs.split_at_mut(chunk / 2);
+            // case when twiddle factor is one
+            let (a, left) = left.split_at_mut(1);
+            let (b, right) = right.split_at_mut(1);
+            let t = b[0];
+            b[0] = a[0];
+            a[0].add_assign(&t);
+            b[0].sub_assign(&t);
+
+            left.iter_mut()
+                .zip(right.iter_mut())
+                .enumerate()
+                .for_each(|(i, (a, b))| {
+                    let mut t = *b;
+                    t.mul_assign(&twiddles[(i + 1) * twiddle_chunk]);
+                    *b = *a;
+                    a.add_assign(&t);
+                    b.sub_assign(&t);
+                });
+        });
+        chunk *= 2;
+        twiddle_chunk /= 2;
+    }
+}
+
+pub fn parallel_fft<S: PrimeField>(a: &mut [S], n: usize, twiddle_chunk: usize, twiddles: &[S]) {
+    if n == 2 {
+        let t = a[1];
+        a[1] = a[0];
+        a[0].add_assign(&t);
+        a[1].sub_assign(&t);
+    } else {
+        let (left, right) = a.split_at_mut(n / 2);
+        rayon::join(
+            || parallel_fft(left, n / 2, twiddle_chunk * 2, twiddles),
+            || parallel_fft(right, n / 2, twiddle_chunk * 2, twiddles),
+        );
+        // case when twiddle factor is one
+        let (a, left) = left.split_at_mut(1);
+        let (b, right) = right.split_at_mut(1);
+        let t = b[0];
+        b[0] = a[0];
+        a[0].add_assign(&t);
+        b[0].sub_assign(&t);
+        left.iter_mut()
+            .zip(right.iter_mut())
+            .enumerate()
+            .for_each(|(i, (a, b))| {
+                let mut t = *b;
+                t.mul_assign(&twiddles[(i + 1) * twiddle_chunk]);
+                *b = *a;
+                a.add_assign(&t);
+                b.sub_assign(&t);
+            });
     }
 }
 

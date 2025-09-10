@@ -1,12 +1,12 @@
 use std::ops::{AddAssign, Mul, MulAssign};
 
 use ff::{Field, PrimeField};
-use group::{prime::PrimeCurveAffine, Curve, Group};
+use group::{Curve, Group, prime::PrimeCurveAffine};
 use pairing::{Engine, MillerLoopResult, MultiMillerLoop};
 use rayon::prelude::*;
 
-use super::{multiscalar, PreparedVerifyingKey, Proof, VerifyingKey};
-use crate::{le_bytes_to_u64s, SynthesisError};
+use super::{PreparedVerifyingKey, Proof, VerifyingKey, multiscalar};
+use crate::{SynthesisError, le_bytes_to_u64s};
 
 /// Generate a prepared verifying key, required to verify a proofs.
 pub fn prepare_verifying_key<E>(vk: &VerifyingKey<E>) -> PreparedVerifyingKey<E>
@@ -146,7 +146,7 @@ where
         let mut repr_u64s = le_bytes_to_u64s(repr.as_ref());
         assert!(repr_u64s.len() > 1);
 
-        repr_u64s[0] = (t & (-1i64 as u128) >> 64) as u64;
+        repr_u64s[0] = (t & ((-1i64 as u128) >> 64)) as u64;
         repr_u64s[1] = (t >> 64) as u64;
 
         for (i, limb) in repr_u64s.iter().enumerate() {

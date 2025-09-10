@@ -3,22 +3,21 @@ use std::ops::{AddAssign, MulAssign};
 
 use blstrs::Compress;
 use ff::{Field, PrimeField};
-use group::{prime::PrimeCurveAffine, Curve};
+use group::{Curve, prime::PrimeCurveAffine};
 use log::{debug, info};
 use rayon::prelude::*;
 use serde::Serialize;
 
 use super::{
-    commit,
+    AggregateProof, AggregateProofAndInstance, GipaProof, KZGOpening, ProverSRS,
+    ProverSRSInputAggregation, TippMippProof, commit,
     commit::{VKey, WKey},
     compress, inner_product,
     poly::DensePolynomial,
     structured_scalar_power,
     transcript::Transcript,
-    AggregateProof, AggregateProofAndInstance, GipaProof, KZGOpening, ProverSRS,
-    ProverSRSInputAggregation, TippMippProof,
 };
-use crate::groth16::{aggregate::AggregateVersion, multiscalar::*, Proof};
+use crate::groth16::{Proof, aggregate::AggregateVersion, multiscalar::*};
 use bellpepper_core::SynthesisError;
 use pairing::{Engine, MultiMillerLoop};
 

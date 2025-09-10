@@ -17,12 +17,12 @@ use pairing::Engine;
 use blstrs::{Bls12, Scalar as Fr};
 
 // We'll use these interfaces to construct our circuit.
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
+use nam_bellperson::{Circuit, ConstraintSystem, SynthesisError};
 
 // We're going to use the Groth16 proving system.
-use bellperson::groth16::{
-    create_random_proof, create_random_proof_batch, generate_random_parameters,
-    prepare_verifying_key, verify_proof, verify_proofs_batch, Proof,
+use nam_bellperson::groth16::{
+    Proof, create_random_proof, create_random_proof_batch, generate_random_parameters,
+    prepare_verifying_key, verify_proof, verify_proofs_batch,
 };
 use std::iter;
 

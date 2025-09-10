@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::ops::AddAssign;
 
 use ff::PrimeField;
-use group::{prime::PrimeCurveAffine, Curve, Group};
+use group::{Curve, Group, prime::PrimeCurveAffine};
 use rayon::prelude::*;
 
 pub const WINDOW_SIZE: usize = 8;
@@ -189,7 +189,7 @@ pub fn multiscalar<G: PrimeCurveAffine>(
         for (m, point) in k.iter().enumerate() {
             let point_limb =
                 u64::from_le_bytes(point.as_ref()[limb * 8..(limb + 1) * 8].try_into().unwrap());
-            idx = point_limb >> (window_in_limb * precomp_table.window_size())
+            idx = (point_limb >> (window_in_limb * precomp_table.window_size()))
                 & precomp_table.window_mask();
             if idx > 0 {
                 table = &precomp_table.tables()[m];

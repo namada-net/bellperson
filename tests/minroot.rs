@@ -11,11 +11,11 @@ use ff::Field;
 use blstrs::Bls12;
 use pairing::Engine;
 // We'll use these interfaces to construct our circuit.
-use bellperson::groth16::{
-    aggregate::AggregateVersion, create_random_proof, generate_random_parameters,
-    prepare_verifying_key, verify_proof, Parameters, Proof,
+use nam_bellperson::groth16::{
+    Parameters, Proof, aggregate::AggregateVersion, create_random_proof,
+    generate_random_parameters, prepare_verifying_key, verify_proof,
 };
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
+use nam_bellperson::{Circuit, ConstraintSystem, SynthesisError};
 
 pub const MINROOT_ROUNDS: usize = 10;
 
@@ -218,11 +218,11 @@ fn minroot_test() {
     images.push(vec![xl, xr, image_xl, image_xr]);
 }
 
-use bellperson::groth16::aggregate::{
-    aggregate_proofs_and_instances, setup_fake_srs, verify_aggregate_proof_and_aggregate_instances,
-    GenericSRS,
-};
 use blstrs::Scalar as Fr;
+use nam_bellperson::groth16::aggregate::{
+    GenericSRS, aggregate_proofs_and_instances, setup_fake_srs,
+    verify_aggregate_proof_and_aggregate_instances,
+};
 use rand_core::SeedableRng;
 
 #[test]

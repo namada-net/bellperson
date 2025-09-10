@@ -2,8 +2,8 @@
 
 use ff::{Field, PrimeField};
 use group::{
-    prime::{PrimeCurve, PrimeCurveAffine, PrimeGroup},
     Curve, Group, GroupEncoding, UncompressedEncoding, WnafGroup,
+    prime::{PrimeCurve, PrimeCurveAffine, PrimeGroup},
 };
 use pairing::{Engine, MillerLoopResult, MultiMillerLoop, PairingCurveAffine};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
@@ -184,11 +184,7 @@ impl MulAssign<Fr> for Fr {
 
 impl ConditionallySelectable for Fr {
     fn conditional_select(a: &Self, b: &Self, choice: Choice) -> Self {
-        if choice.unwrap_u8() == 0 {
-            *a
-        } else {
-            *b
-        }
+        if choice.unwrap_u8() == 0 { *a } else { *b }
     }
 }
 
@@ -378,7 +374,7 @@ impl ec_gpu::GpuName for Fr {
 }
 
 #[cfg(not(any(feature = "cuda", feature = "opencl")))]
-impl bellperson::gpu::GpuName for Fr {}
+impl nam_bellperson::gpu::GpuName for Fr {}
 
 impl MillerLoopResult for Fr {
     type Gt = Fr;
@@ -394,7 +390,7 @@ impl MultiMillerLoop for DummyEngine {
 
     fn multi_miller_loop(i: &[(&Self::G1Affine, &Self::G2Prepared)]) -> Self::Result {
         let mut acc = <Fr as Field>::ZERO;
-        for (&a, &b) in i {
+        for &(&a, &b) in i {
             acc += a * b;
         }
         acc

@@ -1,5 +1,5 @@
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
 use ff::PrimeField;
+use nam_bellperson::{Circuit, ConstraintSystem, SynthesisError};
 
 #[derive(Clone)]
 pub struct DummyDemo {
