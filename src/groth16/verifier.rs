@@ -128,7 +128,9 @@ where
         .map(|p| p.len())
         .unwrap_or_default();
     let num_proofs = proofs.len();
-
+    if num_proofs == 0 {
+        return Ok(true);
+    }
     if num_proofs < 2 {
         return verify_proof(pvk, proofs[0], &public_inputs[0]);
     }
