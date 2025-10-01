@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use bellpepper_core::{Circuit, ConstraintSystem, Index, SynthesisError, Variable};
 use ff::{Field, PrimeField};
-use log::info;
+use log::debug;
 use pairing::MultiMillerLoop;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
@@ -60,7 +60,7 @@ where
     E::G1Affine: GpuName,
     E::G2Affine: GpuName,
 {
-    info!(
+    debug!(
         "Bellperson {} with SupraSeal is being used!",
         BELLMAN_VERSION
     );
@@ -69,7 +69,7 @@ where
 
     // Start fft/multiexp prover timer
     let start = Instant::now();
-    info!("starting proof timer");
+    debug!("starting proof timer");
 
     let num_circuits = provers.len();
     let (r_s, s_s) = randomization.unwrap_or((
@@ -109,7 +109,7 @@ where
     );
 
     let proof_time = start.elapsed();
-    info!("prover time: {:?}", proof_time);
+    debug!("prover time: {:?}", proof_time);
 
     Ok(proofs)
 }
@@ -141,7 +141,7 @@ where
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    info!("synthesis time: {:?}", start.elapsed());
+    debug!("synthesis time: {:?}", start.elapsed());
 
     Ok(provers)
 }

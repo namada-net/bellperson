@@ -9,7 +9,7 @@ use ec_gpu_gen::rust_gpu_tools::Device;
 use ec_gpu_gen::threadpool::Worker;
 use ff::PrimeField;
 use group::{Group, prime::PrimeCurveAffine};
-use log::{error, info};
+use log::{debug, error, warn};
 
 use crate::gpu::GpuName;
 
@@ -38,10 +38,10 @@ fn set_custom_gpu_env_var() {
     if let Ok(custom_gpu) = env::var("BELLMAN_CUSTOM_GPU") {
         match env::var("RUST_GPU_TOOLS_CUSTOM_GPU") {
             Ok(_) => {
-                info!("`BELLMAN_CUSTOM_GPU` was ignored as `RUST_GPU_TOOLS_CUSTOM_GPU` is set.");
+                warn!("`BELLMAN_CUSTOM_GPU` was ignored as `RUST_GPU_TOOLS_CUSTOM_GPU` is set.");
             }
             Err(_) => {
-                info!(
+                warn!(
                     "Please use `RUST_GPU_TOOLS_CUSTOM_GPU` instead of `BELLMAN_CUSTOM_GPU`, \
                      their values are fully compatible."
                 );
@@ -62,7 +62,7 @@ where
 {
     /// Create new kernels, one for each given device.
     pub fn create(devices: &[&Device]) -> EcResult<Self> {
-        info!("Multiexp: CPU utilization: {}.", get_cpu_utilization());
+        debug!("Multiexp: CPU utilization: {}.", get_cpu_utilization());
         set_custom_gpu_env_var();
         let programs = devices
             .iter()
@@ -80,7 +80,7 @@ where
         devices: &[&Device],
         maybe_abort: &'a (dyn Fn() -> bool + Send + Sync),
     ) -> EcResult<Self> {
-        info!("Multiexp: CPU utilization: {}.", get_cpu_utilization());
+        debug!("Multiexp: CPU utilization: {}.", get_cpu_utilization());
         set_custom_gpu_env_var();
         let programs = devices
             .iter()
