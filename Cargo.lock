@@ -827,7 +827,6 @@ dependencies = [
  "temp-env",
  "tempfile",
  "thiserror",
- "wasmtimer",
 ]
 
 [[package]]
@@ -1613,16 +1612,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bad67dc8b2a1a6e5448428adec4c3e84c43e561d8c9ee8a9e5aabeb193ec41d1"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "wasmtimer"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c598d6b99ea013e35844697fc4670d08339d5cda15588f193c6beedd12f644b"
-dependencies = [
- "js-sys",
- "wasm-bindgen",
 ]
 
 [[package]]

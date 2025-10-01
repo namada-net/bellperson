@@ -21,10 +21,6 @@ use crate::groth16::{
     multiscalar::{MultiscalarPrecomp, ScalarList, par_multiscalar},
 };
 use bellpepper_core::SynthesisError;
-#[cfg(not(target_arch = "wasm32"))]
-use std::time::Instant;
-#[cfg(target_arch = "wasm32")]
-use wasmtimer::std::Instant;
 
 use std::default::Default;
 use std::ops::{AddAssign, MulAssign, SubAssign};
@@ -92,7 +88,6 @@ where
     // 1.Check TIPA proof ab
     // 2.Check TIPA proof c
     //        s.spawn(move |_| {
-    let now = Instant::now();
     verify_tipp_mipp::<E, R>(
         ip_verifier_srs,
         proof,
@@ -101,7 +96,6 @@ where
         &hcom,
         version,
     );
-    debug!("TIPP took {} ms", now.elapsed().as_millis(),);
 
     // Check aggregate pairing product equation
     // SUM of a geometric progression
@@ -122,12 +116,9 @@ where
     //
     let (r_vec_sender, r_vec_receiver) = bounded(1);
 
-    let now = Instant::now();
     r_vec_sender
         .send(structured_scalar_power(public_inputs.len(), &*r))
         .unwrap();
-    let elapsed = now.elapsed().as_millis();
-    debug!("generation of r vector: {}ms", elapsed);
 
     par! {
         // 3. Compute left part of the final pairing equation
@@ -163,7 +154,6 @@ where
 
             let powers = r_vec_receiver.recv().unwrap();
 
-            let now = Instant::now();
             // now we do the multi exponentiation
             let getter = |i: usize| -> <E::Fr as PrimeField>::Repr {
                 // i denotes the column of the public input, and j denotes which public input
@@ -184,11 +174,7 @@ where
 
             g_ic.add_assign(&totsi);
 
-            let ml = E::multi_miller_loop(&[(&g_ic.to_affine(), &pvk.gamma_g2)]);
-            let elapsed = now.elapsed().as_millis();
-            debug!("table generation: {}ms", elapsed);
-
-            ml
+            E::multi_miller_loop(&[(&g_ic.to_affine(), &pvk.gamma_g2)])
         }
     };
 
@@ -316,7 +302,6 @@ where
         // 2.Check TIPA proof c
         //        s.spawn(move |_| {
 
-        let now = Instant::now();
         verify_tipp_mipp::<E, R>(
             ip_verifier_srs,
             proof,
@@ -325,8 +310,6 @@ where
             &hcom,
             version,
         );
-
-        debug!("TIPP took {} ms", now.elapsed().as_millis(),);
 
         // Check aggregate pairing product equation
         // SUM of a geometric progression
@@ -422,14 +405,9 @@ fn verify_tipp_mipp<E, R>(
     R: rand_core::RngCore + Send,
 {
     debug!("verify with srs shift");
-    let now = Instant::now();
     // (T,U), Z for TIPP and MIPP  and all challenges
     let (final_res, final_r, challenges, challenges_inv, extra_challenge) =
         gipa_verify_tipp_mipp(proof, r_shift, hcom, version);
-    debug!(
-        "TIPP verify: gipa verify tipp {}ms",
-        now.elapsed().as_millis()
-    );
 
     // Verify commitment keys wellformed
     let fvkey = proof.tmipp.gipa.final_vkey;
@@ -466,7 +444,6 @@ fn verify_tipp_mipp<E, R>(
             .into_challenge(),
     };
 
-    let now = Instant::now();
     par! {
         // check the opening proof for v
         let _vtuple = verify_kzg_v(
@@ -515,10 +492,6 @@ fn verify_tipp_mipp<E, R>(
     match final_z {
         Err(e) => pairing_checks.report_err(e),
         Ok(z) => {
-            debug!(
-                "TIPP verify: parallel checks before merge: {}ms",
-                now.elapsed().as_millis(),
-            );
             let b = z == final_res.zc;
             // only check that doesn't require pairing so we can give a tuple
             // that will render the equation wrong in case it's false
@@ -562,8 +535,6 @@ where
     // Z vectors coming from the GIPA proofs
     let zs_ab = &gipa.z_ab;
     let zs_c = &gipa.z_c;
-
-    let now = Instant::now();
 
     let mut challenges = Vec::new();
     let mut challenges_inv = Vec::new();
@@ -639,12 +610,6 @@ where
         debug!("verify: challenge {} -> {:?}", i, c);
     }
 
-    debug!(
-        "TIPP verify: gipa challenge gen took {}ms",
-        now.elapsed().as_millis()
-    );
-
-    let now = Instant::now();
     // output of the pair commitment T and U in TIPP -> COM((v,w),A,B)
     let (t_ab, u_ab) = proof.com_ab;
     let z_ab = proof.ip_ab; // in the end must be equal to Z = A^r * B
@@ -785,10 +750,6 @@ where
         &E::Fr::ONE,
     );
 
-    debug!(
-        "TIPP verify: gipa prep and accumulate took {}ms",
-        now.elapsed().as_millis()
-    );
     (
         final_res,
         final_r,

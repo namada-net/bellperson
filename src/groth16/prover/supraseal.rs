@@ -5,10 +5,6 @@ use ff::{Field, PrimeField};
 use log::debug;
 use pairing::MultiMillerLoop;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-#[cfg(not(target_arch = "wasm32"))]
-use std::time::Instant;
-#[cfg(target_arch = "wasm32")]
-use wasmtimer::std::Instant;
 
 use super::{ParameterSource, Proof, ProvingAssignment};
 use crate::{BELLMAN_VERSION, gpu::GpuName};
@@ -69,10 +65,6 @@ where
 
     let provers = synthesize_circuits_batch(circuits)?;
 
-    // Start fft/multiexp prover timer
-    let start = Instant::now();
-    debug!("starting proof timer");
-
     let num_circuits = provers.len();
     let (r_s, s_s) = randomization.unwrap_or((
         vec![E::Fr::ZERO; num_circuits],
@@ -110,9 +102,6 @@ where
         srs,
     );
 
-    let proof_time = start.elapsed();
-    debug!("prover time: {:?}", proof_time);
-
     Ok(proofs)
 }
 
@@ -124,8 +113,6 @@ where
     Scalar: PrimeField,
     C: Circuit<Scalar> + Send,
 {
-    let start = Instant::now();
-
     let provers = circuits
         .into_par_iter()
         .map(|circuit| -> Result<_, SynthesisError> {
@@ -142,8 +129,6 @@ where
             Ok(prover)
         })
         .collect::<Result<Vec<_>, _>>()?;
-
-    debug!("synthesis time: {:?}", start.elapsed());
 
     Ok(provers)
 }
