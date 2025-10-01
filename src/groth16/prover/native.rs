@@ -3,7 +3,6 @@
 use std::{
     ops::{AddAssign, Mul, MulAssign},
     sync::Arc,
-    time::Instant,
 };
 
 use bellpepper_core::{Circuit, ConstraintSystem, Index, SynthesisError, Variable};
@@ -13,13 +12,14 @@ use ec_gpu_gen::{
 };
 use ff::{Field, PrimeField};
 use group::{Curve, prime::PrimeCurveAffine};
+use log::debug;
 #[cfg(any(feature = "cuda", feature = "opencl"))]
 use log::trace;
-use log::{debug, info};
 use pairing::MultiMillerLoop;
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator,
 };
+use wasmtimer::std::Instant;
 
 use super::{ParameterSource, Proof, ProvingAssignment};
 #[cfg(any(feature = "cuda", feature = "opencl"))]
@@ -45,7 +45,7 @@ where
     E::G1Affine: GpuName,
     E::G2Affine: GpuName,
 {
-    info!("Bellperson {} is being used!", BELLMAN_VERSION);
+    debug!("Bellperson {} is being used!", BELLMAN_VERSION);
 
     let (start, mut provers, input_assignments, aux_assignments) =
         synthesize_circuits_batch(circuits)?;
@@ -363,7 +363,7 @@ where
     }
 
     let proof_time = start.elapsed();
-    info!("prover time: {:?}", proof_time);
+    debug!("prover time: {:?}", proof_time);
 
     Ok(proofs)
 }
@@ -435,11 +435,11 @@ where
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    info!("synthesis time: {:?}", start.elapsed());
+    debug!("synthesis time: {:?}", start.elapsed());
 
     // Start fft/multiexp prover timer
     let start = Instant::now();
-    info!("starting proof timer");
+    debug!("starting proof timer");
 
     let input_assignments = provers
         .par_iter_mut()

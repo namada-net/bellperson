@@ -2,7 +2,7 @@ use blstrs::Compress;
 use crossbeam_channel::bounded;
 use ff::{Field, PrimeField};
 use group::{Curve, Group, prime::PrimeCurveAffine};
-use log::{debug, info};
+use log::debug;
 use pairing::{Engine, MultiMillerLoop};
 use rayon::prelude::*;
 use serde::Serialize;
@@ -21,10 +21,10 @@ use crate::groth16::{
     multiscalar::{MultiscalarPrecomp, ScalarList, par_multiscalar},
 };
 use bellpepper_core::SynthesisError;
+use wasmtimer::std::Instant;
 
 use std::default::Default;
 use std::ops::{AddAssign, MulAssign, SubAssign};
-use std::time::Instant;
 
 /// Verifies the aggregated proofs thanks to the Groth16 verifying key, the
 /// verifier SRS from the aggregation scheme, all the public inputs of the
@@ -58,7 +58,7 @@ where
     E::G2Affine: Serialize,
     R: rand_core::RngCore + Send,
 {
-    info!("verify_aggregate_proof");
+    debug!("verify_aggregate_proof");
     proof.parsing_check()?;
     for pub_input in public_inputs {
         if (pub_input.len() + 1) != pvk.ic.len() {
@@ -104,7 +104,7 @@ where
     // SUM of a geometric progression
     // SUM a^i = (1 - a^n) / (1 - a) = -(1-a^n)/-(1-a)
     // = (a^n - 1) / (a - 1)
-    info!("checking aggregate pairing");
+    debug!("checking aggregate pairing");
     let mut r_sum = r.pow_vartime([public_inputs.len() as u64]);
     r_sum.sub_assign(&E::Fr::ONE);
     let b = (*r - E::Fr::ONE).invert().unwrap();
@@ -197,7 +197,7 @@ where
     );
 
     let res = pairing_checks.verify();
-    info!("aggregate verify done");
+    debug!("aggregate verify done");
     res
 }
 
@@ -224,7 +224,7 @@ where
     E::G2Affine: Serialize,
     R: rand_core::RngCore + Send,
 {
-    info!("verify_aggregate_proof");
+    debug!("verify_aggregate_proof");
     aggregate_proof_and_instance.parsing_check()?;
     let proof = &aggregate_proof_and_instance.pi_agg;
 
@@ -329,7 +329,7 @@ where
         // SUM of a geometric progression
         // SUM a^i = (1 - a^n) / (1 - a) = -(1-a^n)/-(1-a)
         // = (a^n - 1) / (a - 1)
-        info!("checking aggregate pairing");
+        debug!("checking aggregate pairing");
         let mut r_sum = r.pow_vartime([ip_verifier_srs.n as u64]);
         r_sum.sub_assign(&E::Fr::ONE);
         let b = (*r - E::Fr::ONE).invert().unwrap();
@@ -395,7 +395,7 @@ where
     });
 
     let res = pairing_checks.verify();
-    info!("aggregate verify done");
+    debug!("aggregate verify done");
     res
 }
 
@@ -418,7 +418,7 @@ fn verify_tipp_mipp<E, R>(
     E::G2Affine: Serialize,
     R: rand_core::RngCore + Send,
 {
-    info!("verify with srs shift");
+    debug!("verify with srs shift");
     let now = Instant::now();
     // (T,U), Z for TIPP and MIPP  and all challenges
     let (final_res, final_r, challenges, challenges_inv, extra_challenge) =
@@ -550,7 +550,7 @@ where
     E::G1Affine: Serialize,
     E::G2Affine: Serialize,
 {
-    info!("gipa verify TIPP [version {}]", version);
+    debug!("gipa verify TIPP [version {}]", version);
     let gipa = &proof.tmipp.gipa;
     // COM(A,B) = PROD e(A,B) given by prover
     let comms_ab = &gipa.comms_ab;
@@ -633,7 +633,7 @@ where
         }
         challenges.push(c);
         challenges_inv.push(c_inv);
-        info!("verify: challenge {} -> {:?}", i, c);
+        debug!("verify: challenge {} -> {:?}", i, c);
     }
 
     debug!(

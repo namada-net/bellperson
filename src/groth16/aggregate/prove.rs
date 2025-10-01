@@ -4,7 +4,7 @@ use std::ops::{AddAssign, MulAssign};
 use blstrs::Compress;
 use ff::{Field, PrimeField};
 use group::{Curve, prime::PrimeCurveAffine};
-use log::{debug, info};
+use log::debug;
 use rayon::prelude::*;
 use serde::Serialize;
 
@@ -47,7 +47,7 @@ where
     E::G1Affine: Serialize,
     E::G2Affine: Serialize,
 {
-    info!("aggregate_proofs [version {}]", version);
+    debug!("aggregate_proofs [version {}]", version);
     if proofs.len() < 2 {
         return Err(SynthesisError::MalformedProofs(
             "aggregating less than 2 proofs is not allowed".to_string(),
@@ -510,7 +510,7 @@ where
             // of c_inv
             c = c_inv.invert().unwrap();
         }
-        info!("prover: challenge {} -> {:?}", i, c);
+        debug!("prover: challenge {} -> {:?}", i, c);
 
         // Set up values for next step of recursion
         // A[:n'] + A[n':] ^ x

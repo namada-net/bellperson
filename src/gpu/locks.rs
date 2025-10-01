@@ -7,7 +7,7 @@ use ec_gpu_gen::rust_gpu_tools::{Device, UniqueId};
 use ff::Field;
 use fs2::FileExt;
 use group::prime::PrimeCurveAffine;
-use log::{debug, info, warn};
+use log::{debug, warn};
 
 use crate::gpu::error::{GpuError, GpuResult};
 use crate::gpu::{CpuGpuMultiexpKernel, GpuName};
@@ -44,7 +44,7 @@ impl<'a> GPULock<'a> {
             match val.parse::<usize>() {
                 Ok(val) if val > 0 => {
                     let devices = Device::all();
-                    info!(
+                    debug!(
                         "BELLPERSON_GPUS_PER_LOCK == {}, try lock {}/{} gpus",
                         val,
                         val,
@@ -76,7 +76,7 @@ impl<'a> GPULock<'a> {
                     return GPULock(locks);
                 }
                 Ok(val) if val == 0 => {
-                    info!("BELLPERSON_GPUS_PER_LOCK == 0, no lock acquired");
+                    debug!("BELLPERSON_GPUS_PER_LOCK == 0, no lock acquired");
                     return GPULock(Vec::new());
                 }
                 Ok(val) => warn!(
@@ -87,7 +87,7 @@ impl<'a> GPULock<'a> {
             };
         }
 
-        info!("BELLPERSON_GPUS_PER_LOCK fallback to single lock mode");
+        debug!("BELLPERSON_GPUS_PER_LOCK fallback to single lock mode");
 
         // Fallback to create single lock
         let path = tmp_path(GPU_LOCK_NAME, None);
@@ -209,7 +209,7 @@ where
     };
     match kernel {
         Ok(k) => {
-            info!("GPU FFT kernel instantiated!");
+            debug!("GPU FFT kernel instantiated!");
             Some((k, lock))
         }
         Err(e) => {
@@ -236,7 +236,7 @@ where
     };
     match kernel {
         Ok(k) => {
-            info!("GPU Multiexp kernel instantiated!");
+            debug!("GPU Multiexp kernel instantiated!");
             Some((k, lock))
         }
         Err(e) => {
@@ -282,7 +282,7 @@ macro_rules! locked_kernel {
             fn init(&mut self) {
                 if self.kernel_and_lock.is_none() {
                     PriorityLock::wait(self.priority);
-                    info!("GPU is available for {}!", $name);
+                    debug!("GPU is available for {}!", $name);
                     if let Some((kernel, lock)) = $func(self.priority) {
                         self.kernel_and_lock = Some((kernel, lock));
                     }
