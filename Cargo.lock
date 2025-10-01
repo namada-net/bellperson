@@ -792,7 +792,7 @@ dependencies = [
 
 [[package]]
 name = "nam-bellperson"
-version = "0.26.4-nam.1"
+version = "0.26.5-nam.1"
 dependencies = [
  "bellpepper-core",
  "bincode",
