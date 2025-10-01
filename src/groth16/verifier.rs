@@ -123,7 +123,7 @@ where
         }
     }
 
-    let num_inputs = public_inputs.get(0).map(|p| p.len()).unwrap_or_default();
+    let num_inputs = public_inputs.first().map(|p| p.len()).unwrap_or_default();
     let num_proofs = proofs.len();
     if num_proofs == 0 {
         return Ok(true);
