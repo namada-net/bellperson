@@ -19,6 +19,9 @@ use pairing::MultiMillerLoop;
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator,
 };
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Instant;
+#[cfg(target_arch = "wasm32")]
 use wasmtimer::std::Instant;
 
 use super::{ParameterSource, Proof, ProvingAssignment};

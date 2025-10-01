@@ -12,7 +12,7 @@ documentation = "https://docs.rs/bellperson"
 homepage = "https://github.com/filecoin-project/bellman"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/filecoin-project/bellman"
-version = "0.26.3-nam.1"
+version = "0.26.4-nam.1"
 readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
@@ -41,6 +41,8 @@ ec-gpu-gen = { version = "0.7.0" }
 
 fs2 = { version = "0.4.3", optional = true }
 supraseal-c2 = { package = "nam-supraseal-c2", version = "0.1.2-nam.0", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 wasmtimer = { version = "0.4", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
