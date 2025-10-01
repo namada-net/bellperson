@@ -21,10 +21,10 @@ use crate::groth16::{
     multiscalar::{MultiscalarPrecomp, ScalarList, par_multiscalar},
 };
 use bellpepper_core::SynthesisError;
+use wasmtimer::std::Instant;
 
 use std::default::Default;
 use std::ops::{AddAssign, MulAssign, SubAssign};
-use std::time::Instant;
 
 /// Verifies the aggregated proofs thanks to the Groth16 verifying key, the
 /// verifier SRS from the aggregation scheme, all the public inputs of the

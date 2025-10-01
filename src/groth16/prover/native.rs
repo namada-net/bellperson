@@ -3,7 +3,6 @@
 use std::{
     ops::{AddAssign, Mul, MulAssign},
     sync::Arc,
-    time::Instant,
 };
 
 use bellpepper_core::{Circuit, ConstraintSystem, Index, SynthesisError, Variable};
@@ -20,6 +19,7 @@ use pairing::MultiMillerLoop;
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator,
 };
+use wasmtimer::std::Instant;
 
 use super::{ParameterSource, Proof, ProvingAssignment};
 #[cfg(any(feature = "cuda", feature = "opencl"))]

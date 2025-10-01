@@ -1,12 +1,11 @@
 //! Prover implementation implemented using SupraSeal (C++).
 
-use std::time::Instant;
-
 use bellpepper_core::{Circuit, ConstraintSystem, Index, SynthesisError, Variable};
 use ff::{Field, PrimeField};
 use log::debug;
 use pairing::MultiMillerLoop;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use wasmtimer::std::Instant;
 
 use super::{ParameterSource, Proof, ProvingAssignment};
 use crate::{BELLMAN_VERSION, gpu::GpuName};
