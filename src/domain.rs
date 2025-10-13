@@ -137,7 +137,7 @@ impl<F: PrimeField + gpu::GpuName> EvaluationDomain<F> {
                 let minv = domain.minv;
 
                 for v in domain.coeffs.chunks_mut(chunk) {
-                    scope.execute(move || {
+                    scope.spawn(move |_| {
                         for v in v {
                             *v *= minv;
                         }
@@ -152,7 +152,7 @@ impl<F: PrimeField + gpu::GpuName> EvaluationDomain<F> {
     pub fn distribute_powers(&mut self, worker: &Worker, g: F) {
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for (i, v) in self.coeffs.chunks_mut(chunk).enumerate() {
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     let mut u = g.pow_vartime([(i * chunk) as u64]);
                     for v in v.iter_mut() {
                         *v *= u;
@@ -212,7 +212,7 @@ impl<F: PrimeField + gpu::GpuName> EvaluationDomain<F> {
 
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for v in self.coeffs.chunks_mut(chunk) {
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     for v in v {
                         *v *= i;
                     }
@@ -231,7 +231,7 @@ impl<F: PrimeField + gpu::GpuName> EvaluationDomain<F> {
                 .chunks_mut(chunk)
                 .zip(other.coeffs.chunks(chunk))
             {
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     for (a, b) in a.iter_mut().zip(b.iter()) {
                         *a *= b;
                     }
@@ -250,7 +250,7 @@ impl<F: PrimeField + gpu::GpuName> EvaluationDomain<F> {
                 .chunks_mut(chunk)
                 .zip(other.coeffs.chunks(chunk))
             {
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     for (a, b) in a.iter_mut().zip(b.iter()) {
                         *a -= b;
                     }

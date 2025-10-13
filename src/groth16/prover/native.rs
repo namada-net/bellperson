@@ -6,10 +6,7 @@ use std::{
 };
 
 use bellpepper_core::{Circuit, ConstraintSystem, Index, SynthesisError, Variable};
-use ec_gpu_gen::{
-    multiexp_cpu::FullDensity,
-    threadpool::{THREAD_POOL, Worker},
-};
+use ec_gpu_gen::{multiexp_cpu::FullDensity, threadpool::Worker};
 use ff::{Field, PrimeField};
 use group::{Curve, prime::PrimeCurveAffine};
 use log::debug;
@@ -102,9 +99,9 @@ where
     let provers_ref = &mut provers;
     let params = &params;
 
-    THREAD_POOL.scoped(|s| -> Result<(), SynthesisError> {
+    Worker::new().scoped(|s| -> Result<(), SynthesisError> {
         let params_h = &mut params_h;
-        s.execute(move || {
+        s.spawn(move |_| {
             debug!("get h");
             *params_h = Some(params.get_h(n));
         });
@@ -122,9 +119,9 @@ where
     let mut h_s = Vec::with_capacity(num_circuits);
     let mut params_l = None;
 
-    THREAD_POOL.scoped(|s| {
+    Worker::new().scoped(|s| {
         let params_l = &mut params_l;
-        s.execute(move || {
+        s.spawn(move |_| {
             debug!("get l");
             *params_l = Some(params.get_l(aux_assignment_len));
         });
@@ -151,11 +148,11 @@ where
     let b_input_density_total = provers[0].b_input_density.get_total_density();
     let b_aux_density_total = provers[0].b_aux_density.get_total_density();
 
-    THREAD_POOL.scoped(|s| {
+    Worker::new().scoped(|s| {
         let params_a = &mut params_a;
         let params_b_g1 = &mut params_b_g1;
         let params_b_g2 = &mut params_b_g2;
-        s.execute(move || {
+        s.spawn(move |_| {
             debug!("get_a b_g1 b_g2");
             *params_a = Some(params.get_a(input_len, a_aux_density_total));
             if zk {

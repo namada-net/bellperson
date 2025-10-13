@@ -255,7 +255,7 @@ where
             let powers_of_tau = powers_of_tau.as_mut();
             worker.scope(powers_of_tau.len(), |scope, chunk| {
                 for (i, powers_of_tau) in powers_of_tau.chunks_mut(chunk).enumerate() {
-                    scope.execute(move || {
+                    scope.spawn(move |_| {
                         let mut current_tau_power = tau.pow_vartime([(i * chunk) as u64]);
 
                         for p in powers_of_tau {
@@ -279,7 +279,7 @@ where
             {
                 let mut g1_wnaf = g1_wnaf.shared();
 
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     // Set values of the H query to g1^{(tau^i * t(tau)) / delta}
                     let h: Vec<_> = p
                         .iter()
@@ -364,7 +364,7 @@ where
                 let mut g1_wnaf = g1_wnaf.shared();
                 let mut g2_wnaf = g2_wnaf.shared();
 
-                scope.execute(move || {
+                scope.spawn(move |_| {
                     let mut a = vec![E::G1::identity(); a_affine.len()];
                     let mut b_g1 = vec![E::G1::identity(); a_affine.len()];
                     let mut b_g2 = vec![E::G2::identity(); a_affine.len()];

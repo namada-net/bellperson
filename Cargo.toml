@@ -36,8 +36,7 @@ sha2 = "0.10.6"
 pairing = "0.23"
 blstrs = { package = "nam-blstrs", version = "0.7.1-nam.0", features = ["__private_bench"] }
 ec-gpu = { version = "0.2.0" }
-ec-gpu-gen = { version = "0.7.0" }
-
+ec-gpu-gen = { package = "nam-ec-gpu-gen", version = "0.7.2-nam.0" }
 
 fs2 = { version = "0.4.3", optional = true }
 supraseal-c2 = { package = "nam-supraseal-c2", version = "0.1.2-nam.0", optional = true }
@@ -90,5 +89,5 @@ members = [
 
 [build-dependencies]
 blstrs = { package = "nam-blstrs", version = "0.7.1-nam.0", features = ["__private_bench"] }
-ec-gpu-gen = { version = "0.7.0" }
+ec-gpu-gen = { package = "nam-ec-gpu-gen", version = "0.7.2-nam.0" }
 rustversion = "1.0.6"

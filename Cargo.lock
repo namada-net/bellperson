@@ -381,29 +381,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd63582de2b59ea1aa48d7c1941b5d87618d95484397521b3acdfa0e1e9f5e45"
 
 [[package]]
-name = "ec-gpu-gen"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2353854622ec1abfd22243eb958453b95f1502e2a56648bf9db49ccbfb55f01"
-dependencies = [
- "bitvec",
- "crossbeam-channel",
- "ec-gpu",
- "execute",
- "ff",
- "group",
- "hex",
- "log",
- "num_cpus",
- "once_cell",
- "rayon",
- "rust-gpu-tools",
- "sha2",
- "thiserror",
- "yastl",
-]
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -519,10 +496,13 @@ checksum = "1ced73b1dacfc750a6db6c0a0c3a3853c8b41997e2e2c563dc90804ae6867959"
 
 [[package]]
 name = "flume"
-version = "0.10.14"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1657b4441c3403d9f7b3409e47575237dac27b1b5726df654a6ecbf92f0f7577"
+checksum = "da0e4dd2a88388a1f4ccc7c9ce104604dab68d9f408dc34cd45823d5a9069095"
 dependencies = [
+ "futures-core",
+ "futures-sink",
+ "nanorand",
  "spin",
 ]
 
@@ -541,6 +521,18 @@ name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
+
+[[package]]
+name = "futures-core"
+version = "0.3.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05f29059c0c2090612e8d742178b0580d2dc940c837851ad723096f87af6663e"
+
+[[package]]
+name = "futures-sink"
+version = "0.3.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e575fab7d1e0dcb8d0c7bcf9a63ee213816ab51902e6d244a95819acacf1d4f7"
 
 [[package]]
 name = "generic-array"
@@ -568,8 +560,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "335ff9f135e4384c8150d6f27c6daed433577f86b4750418338c01a1a2528592"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi 0.11.1+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -803,7 +797,6 @@ dependencies = [
  "csv",
  "digest",
  "ec-gpu",
- "ec-gpu-gen",
  "env_logger 0.10.2",
  "ff",
  "fs2",
@@ -813,6 +806,7 @@ dependencies = [
  "log",
  "memmap2",
  "nam-blstrs",
+ "nam-ec-gpu-gen",
  "nam-supraseal-c2",
  "pairing",
  "rand",
@@ -859,6 +853,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "nam-ec-gpu-gen"
+version = "0.7.2-nam.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d34594d64c3d27e3a93de6821deb9a88c2b13dea173aa6b7c66503a1a4261af"
+dependencies = [
+ "bitvec",
+ "ec-gpu",
+ "execute",
+ "ff",
+ "flume",
+ "group",
+ "hex",
+ "log",
+ "num_cpus",
+ "rayon",
+ "rust-gpu-tools",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
 name = "nam-supraseal-c2"
 version = "0.1.2-nam.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -867,6 +882,15 @@ dependencies = [
  "cc",
  "nam-blst",
  "sppark",
+]
+
+[[package]]
+name = "nanorand"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
+dependencies = [
+ "getrandom 0.2.16",
 ]
 
 [[package]]
@@ -1768,16 +1792,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
-]
-
-[[package]]
-name = "yastl"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ca6c5a4d66c1a9ea261811cf4773c27343de7e5033e1b75ea3f297dc7db3c1a"
-dependencies = [
- "flume",
- "scopeguard",
 ]
 
 [[package]]
