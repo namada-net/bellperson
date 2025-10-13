@@ -38,11 +38,11 @@ impl<Scalar: PrimeField> Circuit<Scalar> for DummyDemo {
 #[cfg(any(feature = "cuda", feature = "opencl"))]
 #[test]
 pub fn test_parallel_prover() {
-    use bellperson::groth16::{
+    use blstrs::Bls12;
+    use nam_bellperson::groth16::{
         create_random_proof, create_random_proof_in_priority, generate_random_parameters,
         prepare_verifying_key, verify_proof,
     };
-    use blstrs::Bls12;
     use rand::thread_rng;
     use std::thread;
     use std::time::{Duration, Instant};

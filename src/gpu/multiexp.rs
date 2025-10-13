@@ -45,7 +45,9 @@ fn set_custom_gpu_env_var() {
                     "Please use `RUST_GPU_TOOLS_CUSTOM_GPU` instead of `BELLMAN_CUSTOM_GPU`, \
                      their values are fully compatible."
                 );
-                env::set_var("RUST_GPU_TOOLS_CUSTOM_GPU", custom_gpu)
+                unsafe {
+                    env::set_var("RUST_GPU_TOOLS_CUSTOM_GPU", custom_gpu);
+                }
             }
         }
     }

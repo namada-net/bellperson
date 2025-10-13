@@ -75,7 +75,7 @@ impl<'a> GPULock<'a> {
 
                     return GPULock(locks);
                 }
-                Ok(val) if val == 0 => {
+                Ok(0) => {
                     debug!("BELLPERSON_GPUS_PER_LOCK == 0, no lock acquired");
                     return GPULock(Vec::new());
                 }
@@ -124,6 +124,7 @@ impl<'a> GPULock<'a> {
 impl Drop for GPULock<'_> {
     fn drop(&mut self) {
         for lock_info in &self.0 {
+            #[allow(unstable_name_collisions)]
             lock_info.file.unlock().unwrap();
             debug!("GPU lock released at {:?}", lock_info.path);
         }
@@ -168,6 +169,7 @@ impl PriorityLock {
     ///
     /// It also returns `false` in case the state of the lock cannot be determined.
     fn is_taken() -> bool {
+        #[allow(unstable_name_collisions)]
         if let Err(err) = File::create(tmp_path(PRIORITY_LOCK_NAME, None))
             .unwrap()
             .try_lock_shared()
@@ -184,6 +186,7 @@ impl PriorityLock {
 
 impl Drop for PriorityLock {
     fn drop(&mut self) {
+        #[allow(unstable_name_collisions)]
         self.0.unlock().unwrap();
         debug!("Priority lock released!");
     }
