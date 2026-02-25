@@ -11,6 +11,8 @@
 //! [`EvaluationDomain`]: crate::domain::EvaluationDomain
 //! [Groth16]: https://eprint.iacr.org/2016/260
 
+#[cfg(feature = "wgpu")]
+use crate::gpu::WgpuFftKernel;
 #[cfg(any(feature = "cuda", feature = "opencl"))]
 use ec_gpu_gen::fft::FftKernel;
 use ff::{Field, PrimeField};
@@ -277,6 +279,23 @@ fn best_fft<F: PrimeField + gpu::GpuName>(
         }
     }
 
+    #[cfg(feature = "wgpu")]
+    if let Some(kern) = kern {
+        if kern
+            .with(|k: &mut WgpuFftKernel| wgpu_fft(k, coeffs, omegas, log_ns))
+            .is_ok()
+        {
+            return;
+        }
+    }
+
+    #[cfg(feature = "wgpu")]
+    {
+        if gpu::require_gpu() {
+            panic!("BELLMAN_WGPU_REQUIRE_GPU=1 but wgpu FFT path was unavailable");
+        }
+    }
+
     let log_cpus = worker.log_num_threads();
     for ((a, omega), log_n) in coeffs.iter_mut().zip(omegas.iter()).zip(log_ns.iter()) {
         let n = a.len();
@@ -377,6 +396,37 @@ pub fn gpu_fft<F: PrimeField + gpu::GpuName>(
     log_ns: &[u32],
 ) -> gpu::GpuResult<()> {
     Ok(kern.radix_fft_many(coeffs, omegas, log_ns)?)
+}
+
+#[cfg(feature = "wgpu")]
+pub fn wgpu_fft<F: PrimeField + gpu::GpuName>(
+    kern: &mut WgpuFftKernel,
+    coeffs: &mut [&mut [F]],
+    omegas: &[F],
+    log_ns: &[u32],
+) -> gpu::WgpuResult<()> {
+    if !gpu::use_gpu_fft() {
+        // Keep prover correctness by default until full field-correct GPU FFT is implemented.
+        // Returning an error here triggers the existing CPU fallback path in `best_fft`.
+        return Err(gpu::WgpuError::Simple(
+            "wgpu FFT experimental path disabled; using CPU fallback",
+        ));
+    }
+
+    if gpu::require_gpu() && !gpu::validate_gpu() {
+        return Err(gpu::WgpuError::Simple(
+            "BELLMAN_WGPU_REQUIRE_GPU=1 requires BELLMAN_WGPU_VALIDATE=1",
+        ));
+    }
+
+    let mut vcoeffs = coeffs.iter().map(|c| c.to_vec()).collect::<Vec<_>>();
+    let vomegas = omegas.iter().map(|o| o.to_repr()).collect::<Vec<_>>();
+    kern.radix_fft_many(&mut vcoeffs, &vomegas, log_ns)?;
+
+    for (dst, src) in coeffs.iter_mut().zip(vcoeffs.into_iter()) {
+        dst.copy_from_slice(&src);
+    }
+    Ok(())
 }
 
 #[cfg(test)]

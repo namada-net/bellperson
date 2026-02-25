@@ -477,3 +477,55 @@ Based on CUDA/OpenCL precedent:
 6. Test wgpu device initialization in browser and native
 7. Measure WGSL shader compilation time
 8. Check WebGPU limits on target hardware
+
+## Implementation Findings Update (2026-02-25)
+
+- `wgpu` backend is integrated behind feature flag and compiles cleanly with strict clippy.
+- Prover integration points are correctly wired to attempt GPU and then safely fallback to CPU.
+- Current `wgpu` FFT/MSM paths are still fallback stubs; no production GPU math path is active yet.
+- Browser target compilation is currently blocked in this environment by transitive `nam-blst` wasm C-toolchain constraints, not by immediate Rust-level wgpu code issues.
+- For Firefox/Chrome correctness claims, we still need:
+  1. wasm-target successful build in CI
+  2. browser runtime smoke test (adapter/device init + one proof)
+  3. kernel correctness checks against CPU reference for FFT/MSM
+
+---
+
+## Phase 1 Completion Notes (2026-02-25)
+
+### Key Discoveries
+
+1. **Existing WebGPU ZK Libraries Found:**
+   - **zkHubHQ/astra**: Full ZK library with NTT and MSM for BLS12-377 & BN-254 in WebGPU
+   - **demox-labs/webgpu-msm**: ZPrize 2023 winning WebGPU MSM implementation
+   - **voidash/webgpu-examples**: WGSL BLS12-381 implementation! (directly relevant!)
+   - **FuelLabs/wgpu-sigops**: ECDSA/EdDSA in WGSL with field arithmetic
+
+2. **Critical Resources:**
+   - zkSecurity blog: "Accelerating ZK Proving with WebGPU" - excellent NTT tutorial
+   - ZPrize 2023: MSM competition for BLS12-377 browser performance
+   - Research paper: NTT can be up to 90% of ZKP runtime
+
+3. **Implementation Approach:**
+   - Should NOT build from scratch - leverage existing libraries!
+   - Consider integrating astra or adapting ZPrize implementations
+   - For BLS12-381 specifically: use voidash/webgpu-examples as reference
+   - Need to adapt for bellperson's API requirements
+
+4. **Technical Insights:**
+   - WGSL requires multi-limb arithmetic (no 64-bit ints)
+   - BLS12-381: 381-bit Fp needs ~13 x 30-bit limbs or similar
+   - BLS12-381: 255-bit Fr needs ~8 x 32-bit limbs
+   - Pippenger's bucket method is standard for MSM
+   - Cooley-Tukey for NTT/FFT
+
+### Decision: Build Integration Layer
+
+Instead of writing all kernels from scratch, the approach will be:
+1. Create wgpu backend module structure in bellperson
+2. Implement field arithmetic in WGSL (baseline from voidash or similar)
+3. Implement FFT kernel (follow zkSecurity NTT tutorial)
+4. Implement MSM kernel (adapt from ZPrize or astra)
+5. Integrate with existing prover flow
+
+This is achievable! The research shows it's been done for similar curves.

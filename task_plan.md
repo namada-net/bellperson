@@ -35,8 +35,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 
 ## Phases
 
-### Phase 1: Research & Design [pending]
-**Status:** pending
+### Phase 1: Research & Design [completed]
+**Status:** completed
 **Estimated Time:** 2-3 hours
 
 **Tasks:**
@@ -58,8 +58,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - CUDA/OpenCL kernel sources (generated at build time)
 - `src/groth16/prover/native.rs` - understand proving flow
 
-### Phase 2: wgpu Backend Skeleton [pending]
-**Status:** pending
+### Phase 2: wgpu Backend Skeleton [completed]
+**Status:** completed
 **Estimated Time:** 3-4 hours
 
 **Tasks:**
@@ -83,8 +83,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - `src/gpu/wgpu/multiexp.rs`
 - `src/gpu/wgpu/error.rs`
 
-### Phase 3: BLS12-381 Field Arithmetic in WGSL [pending]
-**Status:** pending
+### Phase 3: BLS12-381 Field Arithmetic in WGSL [partial]
+**Status:** partial
 **Estimated Time:** 4-6 hours
 
 **Tasks:**
@@ -108,8 +108,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - Base field Fp: 381 bits
 - May need to use multiple u32 limbs (e.g., 8 x u32 for 256 bits)
 
-### Phase 4: FFT Kernel Implementation [pending]
-**Status:** pending
+### Phase 4: FFT Kernel Implementation [partial]
+**Status:** partial
 **Estimated Time:** 5-8 hours
 
 **Tasks:**
@@ -138,8 +138,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - Input/output: slices of field elements
 - Must handle omega (root of unity) correctly
 
-### Phase 5: Multi-Exponentiation (MSM) Kernel [pending]
-**Status:** pending
+### Phase 5: Multi-Exponentiation (MSM) Kernel [partial]
+**Status:** partial
 **Estimated Time:** 8-12 hours
 
 **Tasks:**
@@ -169,8 +169,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - Need to handle both G1 and G2 curves
 - Must support density maps (sparse exponent vectors)
 
-### Phase 6: Integration with Prover [pending]
-**Status:** pending
+### Phase 6: Integration with Prover [completed]
+**Status:** completed
 **Estimated Time:** 3-5 hours
 
 **Tasks:**
@@ -191,8 +191,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - `src/multiexp.rs` - add wgpu dispatch
 - `src/domain.rs` - add wgpu FFT path
 
-### Phase 7: Browser Compatibility [pending]
-**Status:** pending
+### Phase 7: Browser Compatibility [partial]
+**Status:** partial
 **Estimated Time:** 4-6 hours
 
 **Tasks:**
@@ -219,8 +219,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - Browser console for debugging
 - Test on actual WebGPU-enabled browsers
 
-### Phase 8: Performance Optimization [pending]
-**Status:** pending
+### Phase 8: Performance Optimization [not started]
+**Status:** not started
 **Estimated Time:** 5-10 hours
 
 **Tasks:**
@@ -243,8 +243,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - May need browser-specific tuning
 - Document hardware requirements (GPU specs needed for good perf)
 
-### Phase 9: Testing & Documentation [pending]
-**Status:** pending
+### Phase 9: Testing & Documentation [in progress]
+**Status:** in progress
 **Estimated Time:** 3-4 hours
 
 **Tasks:**
@@ -268,8 +268,8 @@ The GPU abstraction is compile-time via feature flags, not runtime polymorphism.
 - `Cargo.toml`
 - Add doc comments to new modules
 
-### Phase 10: Cleanup & Polish [pending]
-**Status:** pending
+### Phase 10: Cleanup & Polish [in progress]
+**Status:** in progress
 **Estimated Time:** 2-3 hours
 
 **Tasks:**
@@ -377,15 +377,38 @@ New (if needed):
 
 ## Progress Log
 
-### Session 1 (Current)
+### Session 1 (Complete)
 - Explored bellperson repository structure
 - Analyzed existing GPU backends (CUDA/OpenCL)
 - Studied Groth16 prover implementation
 - Understood FFT and multiexp kernel architecture
 - Created comprehensive task plan
 
-## Next Steps
+## Current Status (Updated)
 
-1. Complete Phase 1 (Research & Design)
-2. Make final architectural decisions
-3. Begin Phase 2 (wgpu Backend Skeleton)
+Implemented and verified:
+1. `wgpu` feature integration and backend scaffolding
+2. Integration points in `src/domain.rs` and `src/multiexp.rs` with safe CPU fallback
+3. Native checks/tests:
+   - `cargo check --features "groth16,wgpu"` passes
+   - `cargo clippy --features "groth16,wgpu" -- -D warnings` passes
+   - `cargo test --features "groth16,wgpu" --test groth16` passes
+
+Remaining to claim full completion:
+1. Replace fallback stubs with real GPU FFT/MSM kernels
+2. Add wasm/browser CI checks for Firefox and Chrome (currently blocked by transitive `nam-blst` wasm toolchain issue in this environment)
+3. Add browser runtime tests and benchmarks
+
+## Current Status (Updated 2026-02-25, Session 9)
+
+Newly completed this session:
+1. Added real wgpu command-buffer dispatch in both FFT and MSM backend paths (native + wasm-compatible code paths)
+2. Added native integration test to validate FFT path performs at least one GPU dispatch when GPU is available:
+   - `tests/wgpu_backend.rs`
+3. Confirmed wasm build with Homebrew LLVM clang:
+   - `CC=/opt/homebrew/opt/llvm/bin/clang cargo check --target wasm32-unknown-unknown --features "groth16,wgpu"` passes
+
+Refined phase status:
+- Phase 4: partial, now includes real compute dispatch + CPU-reference FFT fallback
+- Phase 5: partial, now includes real compute dispatch + CPU MSM fallback
+- Phase 7: in progress with successful wasm compilation and host-side coverage; browser runtime smoke tests still pending

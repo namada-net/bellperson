@@ -40,6 +40,14 @@ ec-gpu-gen = { package = "nam-ec-gpu-gen", version = "0.7.2-nam.0" }
 
 fs2 = { version = "0.4.3", optional = true }
 supraseal-c2 = { package = "nam-supraseal-c2", version = "0.1.2-nam.0", optional = true }
+wgpu = { version = "0.19", optional = true }
+pollster = { version = "0.4", optional = true }
+bytemuck = { version = "1.14", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+web-sys = { version = "0.3", optional = true, features = ["Window", "Navigator"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 memmap2 = "0.5.8"
@@ -61,6 +69,14 @@ itertools = "0.10.0"
 default = ["groth16"]
 cuda = ["ec-gpu-gen/cuda", "fs2", "blstrs/gpu"]
 opencl = ["ec-gpu-gen/opencl", "fs2", "blstrs/gpu"]
+wgpu = [
+  "dep:wgpu",
+  "dep:pollster",
+  "dep:bytemuck",
+  "dep:wasm-bindgen",
+  "dep:wasm-bindgen-futures",
+  "dep:web-sys",
+]
 groth16 = []
 cuda-supraseal = ["supraseal-c2"]
 bench-time = []

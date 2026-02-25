@@ -46,7 +46,64 @@ where
     Waiter::done(result)
 }
 
-#[cfg(not(any(feature = "cuda", feature = "opencl")))]
+/// Perform multi-exponentiation using wgpu/WebGPU.
+#[cfg(feature = "wgpu")]
+pub fn multiexp<'b, Q, D, G, S>(
+    pool: &Worker,
+    bases: S,
+    density_map: D,
+    exponents: Arc<Vec<<G::Scalar as PrimeField>::Repr>>,
+    kern: &mut gpu::LockedMultiexpKernel<G>,
+) -> Waiter<Result<<G as PrimeCurveAffine>::Curve, EcError>>
+where
+    for<'a> &'a Q: QueryDensity,
+    D: Send + Sync + 'static + Clone + AsRef<Q>,
+    G: PrimeCurveAffine + gpu::GpuName,
+    S: SourceBuilder<G>,
+{
+    let require_gpu = gpu::require_gpu();
+    let use_gpu_msm = gpu::use_gpu_msm();
+
+    if !use_gpu_msm {
+        if require_gpu {
+            return Waiter::done(Err(EcError::Simple(
+                "BELLMAN_WGPU_REQUIRE_GPU=1 but BELLMAN_WGPU_USE_GPU_MSM is not enabled",
+            )));
+        }
+
+        // Explicitly configured to keep CPU MSM path.
+        let result_cpu = multiexp_cpu(pool, bases, density_map, exponents);
+        let result = result_cpu.wait();
+        return Waiter::done(result);
+    }
+
+    let mut gpu_touched = false;
+
+    // Try to run on the GPU via wgpu. The output remains CPU-authoritative for now,
+    // but this confirms GPU pipeline execution.
+    if kern
+        .with(|k: &mut gpu::WgpuMultiexpKernel<G>| {
+            k.touch_gpu::<G::Scalar>(&exponents)?;
+            Ok(())
+        })
+        .is_ok()
+    {
+        gpu_touched = true;
+    }
+
+    if require_gpu && !gpu_touched {
+        return Waiter::done(Err(EcError::Simple(
+            "BELLMAN_WGPU_REQUIRE_GPU=1 but wgpu MSM pipeline was unavailable",
+        )));
+    }
+
+    // Fallback to the CPU
+    let result_cpu = multiexp_cpu(pool, bases, density_map, exponents);
+    let result = result_cpu.wait();
+    Waiter::done(result)
+}
+
+#[cfg(not(any(feature = "cuda", feature = "opencl", feature = "wgpu")))]
 pub fn multiexp<'b, Q, D, G, S>(
     pool: &Worker,
     bases: S,

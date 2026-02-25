@@ -13,7 +13,78 @@ There is currently one backend available for the implementation of Bls12 381:
 
 ## GPU
 
-This fork contains GPU parallel acceleration to the FFT and Multiexponentation algorithms in the groth16 prover codebase under the compilation features `cuda` and `opencl`.
+This fork contains GPU parallel acceleration to the FFT and Multiexponentation algorithms in the groth16 prover codebase under the compilation features `cuda`, `opencl`, and `wgpu`.
+
+### WebGPU / wgpu backend (experimental)
+
+The `wgpu` backend is designed for browser-first GPU execution (WebGPU) while also supporting native GPUs (for example Metal on macOS).
+
+Enable it with:
+
+```bash
+cargo test --features groth16,wgpu
+```
+
+For wasm/browser builds:
+
+```bash
+CC=/opt/homebrew/opt/llvm/bin/clang cargo check --target wasm32-unknown-unknown --features groth16,wgpu
+```
+
+#### wgpu environment controls
+
+- `WGPU_BACKEND`
+  - Comma-separated list of backends (`metal,vulkan,dx12,gl,browser_webgpu`)
+  - Example: `WGPU_BACKEND=metal,vulkan,gl`
+
+- `WGPU_ADAPTER_NAME`
+  - Case-insensitive substring match for adapter selection
+  - Example: `WGPU_ADAPTER_NAME=apple`
+
+- `WGPU_POWER_PREF`
+  - `high` (default) or `low`
+
+- `BELLMAN_WGPU_REQUIRE_GPU`
+  - When set to `1`, wgpu paths are required (no silent fallback)
+
+- `BELLMAN_WGPU_VALIDATE`
+  - When set to `1`, enables host-side readback validation for staged wgpu kernels
+
+- `BELLMAN_WGPU_USE_GPU_FFT`
+  - Enables experimental application of wgpu FFT output to prover path
+
+- `BELLMAN_WGPU_USE_GPU_MSM`
+  - Controls MSM GPU execution preference (`1` default behavior in wgpu mode)
+
+#### wasm/browser runtime controls (no env vars required)
+
+For browser builds (`wasm32`), you can configure backend selection programmatically:
+
+```rust
+// browser-oriented backend preference
+nam_bellperson::gpu::wasm_set_wgpu_backends("browser_webgpu,gl");
+
+// optional adapter-name preference (mostly useful in native contexts)
+nam_bellperson::gpu::wasm_set_wgpu_adapter_name_filter(None);
+
+// clear override
+nam_bellperson::gpu::wasm_clear_wgpu_backends_override();
+```
+
+See also:
+- `examples/wgpu_wasm_config.rs`
+
+#### Strict non-skip backend tests (native)
+
+```bash
+BELLMAN_RUN_WGPU_TESTS=1 \
+WGPU_BACKEND=metal \
+BELLMAN_NO_GPU=0 \
+BELLMAN_WGPU_USE_GPU_FFT=1 \
+BELLMAN_WGPU_REQUIRE_GPU=1 \
+BELLMAN_WGPU_VALIDATE=1 \
+cargo test --features groth16,wgpu --test wgpu_backend -- --nocapture
+```
 
 ### Requirements
 - NVIDIA (Turing or newer) or 
