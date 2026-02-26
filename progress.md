@@ -1466,3 +1466,26 @@ Breakdown estimate:
 
 **Status:** Implementation started. Skeleton complete.
 **Next Phase:** Phase 3 - Field Arithmetic (research existing implementations)
+
+---
+
+## Session 10: Context Recovery & Deep Audit (2026-02-26)
+**Goal:** Resume from previous sessions; audit actual GPU compute path
+
+### Audit findings (critical):
+
+1. **GPU infrastructure is in place** — device init, pipeline creation, buffer dispatch all work.
+2. **BUT: no real GPU math is happening yet.** Both FFT and MSM:
+   - Dispatch WGSL shaders to GPU (proving pipeline works)
+   - Then compute the answer on CPU and return that
+   - `serial_fft_reference()` / `multiexp_cpu()` are the authoritative sources
+3. **`field_arithmetic.wgsl` has invalid WGSL** — tuple return types, `u64` casts, broken hex literals — file is unused and would fail wgpu compilation.
+4. **FFT shader (NOOP_WGSL) is fake arithmetic** — XOR-based twiddle, not real field multiplication.
+5. **MSM shaders are placeholder math** — decomp/window/bucket/sum are toy transforms, not Pippenger.
+6. **wasm32 `block_on_compat` panics** — device init on wasm32 always panics. Browser proving is NOT currently functional.
+
+### Phase priorities for this session:
+1. Phase 3: Fix `field_arithmetic.wgsl` to valid WGSL with real BLS12-381 Fr arithmetic (Montgomery)
+2. Phase 4: Replace `NOOP_WGSL` with a real FFT butterfly shader using Fr field ops; read back + validate
+3. Phase 7 (blocking): Fix wasm32 async device init for Firefox/Chrome
+4. Phase 5: Real MSM (Pippenger) in WGSL (after FFT works)

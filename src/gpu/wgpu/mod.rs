@@ -25,6 +25,7 @@
 mod device;
 mod error;
 mod fft;
+pub(crate) mod field_arith;
 mod multiexp;
 mod packing;
 mod policy;
@@ -39,6 +40,8 @@ pub use self::device::{
     wasm_clear_wgpu_backends_override, wasm_set_wgpu_adapter_name_filter, wasm_set_wgpu_backends,
 };
 pub use self::error::{WgpuError, WgpuResult};
+#[cfg(not(target_arch = "wasm32"))]
+pub use self::field_arith::{FrOp, run_fr_op_gpu};
 pub use self::fft::{
     WgpuFftKernel, fft_bitrev_dispatches, fft_gpu_dispatches, fft_pipeline_completed,
     fft_stage_dispatches, reset_fft_gpu_dispatches,
